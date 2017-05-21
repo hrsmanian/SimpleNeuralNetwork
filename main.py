@@ -1,5 +1,6 @@
 import numpy as np;
 from NN import NN
+from sys import exit
 
 def ReadData(inputFileName) :
 
@@ -40,20 +41,25 @@ def ReadData(inputFileName) :
                 count += 2;
     return (numData, numInput, numOutput, np.array(inputListOfList), np.array(outputListOfList));
 
-inputFileName = "mnist_test_encoded.csv";
-testData = ReadData(inputFileName);
-nn = NN(testData[1],[(50, 'tanh'), (50, 'tanh'), (testData[2], 'softmax')])
-trainData = ReadData("mnist_train_encoded.csv");
+testNumData, testNumInput, testNumOutput, testData, testLabels = ReadData("mnist_test_encoded.csv");
+trainNumData, trainNumInput, trainNumOutput, trainData, trainLabels = ReadData("mnist_train_encoded.csv");
 
-nn.train(trainData[3], trainData[4], 10, 0.01, 0.5);
+if (trainNumInput != testNumInput or
+    trainNumOutput != testNumOutput) :
+    print("Dimension mismatch. Exiting.")
+    exit(-1)
+
+
+nn = NN(testNumInput,[(50, 'tanh'), (50, 'tanh'), (testNumOutput, 'softmax')])
+nn.train(trainData, trainLabels, 10, 0.01, 0.5);
 
 
 print( "Model accuracy on training data =",)
-acc_train = nn.accuracy(trainData[3], trainData[4]);
+acc_train = nn.accuracy(trainData, trainLabels);
 print( "%.4f" % acc_train)
 
 print( "Model accuracy on test data     =",)
-acc_test = nn.accuracy(testData[3], testData[4])
+acc_test = nn.accuracy(testData, testLabels)
 print( "%.4f" % acc_test)
 
 print("Done")
